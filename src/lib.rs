@@ -1,4 +1,5 @@
-use std::ffi::CString;
+use std::ffi::CStr;
+use std::os::raw::c_char;
 
 #[no_mangle]
 pub extern fn double_input(x: i32) -> i32 {
@@ -6,11 +7,13 @@ pub extern fn double_input(x: i32) -> i32 {
 }
 
 #[no_mangle]
-pub extern fn print_string(x: CString) {
-    if let Ok(input) = x.into_string() {
-        println!("We're printing strings from Rust!");
-        println!("{}",input);
-    } else {
-        panic!("Unable to print input");
+pub extern fn print_string(x: *const c_char) {
+    unsafe {
+        let cstring = CStr::from_ptr(x);
+        if let Ok(input) = cstring.to_str() {
+            println!("{}",input);
+        } else {
+            panic!("Unable to print input");
+        }
     }
 }
